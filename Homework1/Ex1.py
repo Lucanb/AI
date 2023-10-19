@@ -111,7 +111,7 @@ def Heuristic(matrix,values):
 
 #4. Strategia IDFS : Se alege in mod iterativ cate o adancime maxima si se exploreaza vecinii pana la acea adancime. Daca am dat peste o solutie,algorithmul se incheie.
 
-def IDDFS(matrix,values,depth,maxDepth):
+def IDDFS(cont,matrix,values,depth,maxDepth):
         if depth > maxDepth:
             return None
         if(Final_State_Verif(matrix)) :
@@ -119,9 +119,10 @@ def IDDFS(matrix,values,depth,maxDepth):
         distances,positions = get_distances(matrix,values)
         for position in positions:
            if isInMAtrix(position[0],position[1]):
+            #print(cont)
             matrix,values = Transition(matrix,values,position)
             if matrix is not None and values is not None:  
-                 result = IDDFS(matrix,values, depth + 1, maxDepth)
+                 result = IDDFS(cont+1,matrix,values, depth + 1, maxDepth)
             else:
                 return 
         return None   
@@ -131,7 +132,8 @@ def Solve_IDDFS(matrix,values):
         maxDepth = 0
         depth = 0
         while True :
-          result = IDDFS(matrix,values,depth,maxDepth)
+          print(depth)
+          result = IDDFS(0,matrix,values,depth,maxDepth)
           if result is not None :
             return result
           maxDepth += 1 
