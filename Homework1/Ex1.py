@@ -15,22 +15,29 @@ import random
 #   Starea Finala   : Matrice care are valorile ordonate in felul urmator (#3*i+j+1 == valoarea) pentru toate valorile din matrice si valoarea 0 se afla pe pozitia 9
 
 def Initialisation_State() :
-    value = [0, 0]
-    values = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-    random.shuffle(values)
-    matrix = [[values[0], values[1], values[2]], [values[3], values[4], values[5]], [values[6], values[7], values[8]]]
-    for i in range(3):
-        for j in range(3):
-            if matrix[i][j] == 0:
-                value = [i, j]
-                break
+    # value = [0, 0]
+    # values = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    # random.shuffle(values)
+    # matrix = [[values[0], values[1], values[2]], [values[3], values[4], values[5]], [values[6], values[7], values[8]]]
+    # for i in range(3):
+    #     for j in range(3):
+    #         if matrix[i][j] == 0:
+    #             value = [i, j]
+    #             break
+    # matrix = [[8,6,7],[2,5,4],[0,3,1]]
+    # value = [2,0]
+    # matrix = [[2,5,3],[1,0,6],[4,7,8]]
+    # value = [1,1]
+    matrix = [[2,7,5],[0,8,4],[3,1,6]]
+    value = [1,0] 
+
     return matrix, value
 
 def Final_State_Verif(matrix):
 
     for i in range(3):
        for j in range(3):
-            if(matrix[i][j] != 3*i +j+1):  
+            if(matrix[i][j] != 3*i +j):  
              return False
     return True
 
@@ -43,13 +50,13 @@ def isInMAtrix(i,j):
     return False
 
 def get_distances(matrix,values):
-   n_up = values[0] + 1
+   n_up = values[0] + 1  # urc pe linie
    next_1 = [n_up,values[1]]
-   n_down = values[0] - 1
+   n_down = values[0] - 1 #cobor pe linie
    next_2 = [n_down,values[1]]
-   n_left = values [1] - 1
+   n_left = values [1] - 1  #stanga
    next_3 = [values[0],n_left]
-   n_right = values [1] +1
+   n_right = values [1] +1  #dreapta
    next_4 = [values[0],n_right]
    # daca pozitia nu este valida voi da o distanta foarte mare care sa nu fie luata in calcul
    if(isInMAtrix(n_up,values[1])):
@@ -68,6 +75,7 @@ def get_distances(matrix,values):
     distance4 = (values[0]**2 + (n_right-values[1])**2)**1/2    
    else:
     distance4 = 1000000  
+   #print([distance1,distance2, distance3,distance4],[next_1,next_2,next_3,next_4])
    return  [distance1,distance2, distance3,distance4],[next_1,next_2,next_3,next_4]
 
 def getMinimum_distance(matrix,values):   #asta e in cazul unei abordari greedy (iau cea mai buna distanta)
@@ -80,6 +88,7 @@ def Transition(matrix,values,next):
     matrix[next[0]][next[1]] = matrix[values[0]][values[1]]
     matrix[values[0]][values[1]] = const
     values=next 
+    #print(matrix)
     return matrix,values
    else:
     return None,None 
@@ -95,19 +104,21 @@ def Heuristic(matrix,values):
    move = random.randint(0, 3)
    if(isInMAtrix(positions[0]) and move == 0):
     Transition(matrix,values,positions[0])
+    return matrix,values
    if(isInMAtrix(positions[1]) and move == 1):
+    return matrix,values
     Transition(matrix,values,positions[1])
    if(isInMAtrix(positions[2]) and move == 2):
-    Transition(matrix,values,positions[2])   
+    Transition(matrix,values,positions[2])
+    return matrix,values  
    if(isInMAtrix(positions[3]) and move == 3):
     Transition(matrix,values,positions[3])
+    return matrix,values
 
 #Pt un greedy
     # const = matrix[next[0],next[1]] 
     # matrix[next[0],next[1]] = matrix[values[0],values[1]]
     # matrix[values[0],values[1]] = const  
-
-    return matrix,values
 
 #4. Strategia IDFS : Se alege in mod iterativ cate o adancime maxima si se exploreaza vecinii pana la acea adancime. Daca am dat peste o solutie,algorithmul se incheie.
 
@@ -117,14 +128,17 @@ def IDDFS(cont,matrix,values,depth,maxDepth):
         if(Final_State_Verif(matrix)) :
             return matrix
         distances,positions = get_distances(matrix,values)
+        # print('--------------')
+        # print(matrix)
+        # print(values,positions)
+        # print('--------------')
         for position in positions:
            if isInMAtrix(position[0],position[1]):
             #print(cont)
             matrix,values = Transition(matrix,values,position)
-            if matrix is not None and values is not None:  
+            if matrix is not None and values is not None:
+                 print(matrix)  
                  result = IDDFS(cont+1,matrix,values, depth + 1, maxDepth)
-            else:
-                return 
         return None   
 
 def Solve_IDDFS(matrix,values):
@@ -132,7 +146,7 @@ def Solve_IDDFS(matrix,values):
         maxDepth = 0
         depth = 0
         while True :
-          print(depth)
+          #print(depth)
           result = IDDFS(0,matrix,values,depth,maxDepth)
           if result is not None :
             return result
@@ -140,8 +154,21 @@ def Solve_IDDFS(matrix,values):
 
 if __name__ == '__main__':
     matrix,values = Initialisation_State() 
+    
+  ###########################  
+    # print (matrix,values)
+    # n_up = values[0] + 1  # urc pe linie
+    # next_1 = [n_up,values[1]]
+    # n_down = values[0] - 1 #cobor pe linie
+    # next_2 = [n_down,values[1]]
+    # n_left = values [1] - 1  #stanga
+    # next_3 = [values[0],n_left]
+    # n_right = values [1] +1  #dreapta
+    # next_4 = [values[0],n_right]
+    # matrix,values = Transition(matrix,values,next_4)
+    # print(matrix,values)
+  ################################# Verif Transition  
     solution = Solve_IDDFS(matrix,values)
-
     # Afișarea soluției
     if solution:
         print('Puzzle solved')
