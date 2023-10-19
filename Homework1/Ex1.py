@@ -15,16 +15,16 @@ import random
 #   Starea Finala   : Matrice care are valorile ordonate in felul urmator (#3*i+j+1 == valoarea) pentru toate valorile din matrice si valoarea 0 se afla pe pozitia 9
 
 def Initialisation_State() :
-    value = [0,0]
+    value = [0, 0]
     values = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     random.shuffle(values)
-    matrix = [[values[0],values[1],values[2]]],[values[3],values[4],[values[5]]],[values[6],values[7],[values[8]]]
-    for i in range(9):
-     for j in range(9):
-        if matrix[i][j] == 0:
-           value = [i,j]
-           break
-    return matrix,value 
+    matrix = [[values[0], values[1], values[2]], [values[3], values[4], values[5]], [values[6], values[7], values[8]]]
+    for i in range(3):
+        for j in range(3):
+            if matrix[i][j] == 0:
+                value = [i, j]
+                break
+    return matrix, value
 
 def Final_State_Verif(matrix):
 
@@ -75,7 +75,7 @@ def getMinimum_distance(matrix,values):   #asta e in cazul unei abordari greedy 
    return min(distances),positions[distances.index(min(values))]   
 
 def Transition(matrix,values,next):
-   if(isInMAtrix(next)):
+   if(isInMAtrix(next[0],next[1])):
     const = matrix[next[0],next[1]] 
     matrix[next[0],next[1]] = matrix[values[0],values[1]]
     matrix[values[0],values[1]] = const
@@ -116,7 +116,7 @@ def IDDFS(matrix,values,depth,maxDepth):
             return matrix
         distances,positions = get_distances(matrix,values)
         for position in positions:
-           matrix,values = Transition(matrix,values)
+           matrix,values = Transition(matrix,values,position)
            result = IDDFS(matrix,values, depth + 1, maxDepth)
         return None   
 
