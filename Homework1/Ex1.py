@@ -28,8 +28,8 @@ def Initialisation_State() :
 
 def Final_State_Verif(matrix):
 
-    for i in range(9):
-       for j in range(9):
+    for i in range(3):
+       for j in range(3):
             if(matrix[i][j] != 3*i +j+1):  
              return False
     return True
@@ -37,7 +37,7 @@ def Final_State_Verif(matrix):
 # 3. Tranzitia este reprezentata de o actiune de schimb intre valoriile de pe pozitia in care am valoarea 0 si un vecin (up,down,left,rights)
 # Ca parametrii vom avea locatiile in care se pot face aceste schimbari(interiorul matricii) (am pozitia lui 0,am si vecinii lui), pot sa mai adaug si o distanta dupa care sa fa decizia 
 def isInMAtrix(i,j):
-   if i>=0 and i<=8 and j>=0 and j<=8 :
+   if i>=0 and i<3 and j>=0 and j<3 :
     return True
    else :
     return False
@@ -76,11 +76,13 @@ def getMinimum_distance(matrix,values):   #asta e in cazul unei abordari greedy 
 
 def Transition(matrix,values,next):
    if(isInMAtrix(next[0],next[1])):
-    const = matrix[next[0],next[1]] 
-    matrix[next[0],next[1]] = matrix[values[0],values[1]]
-    matrix[values[0],values[1]] = const
+    const = matrix[next[0]][next[1]] 
+    matrix[next[0]][next[1]] = matrix[values[0]][values[1]]
+    matrix[values[0]][values[1]] = const
     values=next 
-   return matrix,values 
+    return matrix,values
+   else:
+    return None,None 
    
 def Heuristic(matrix,values):  
    n_up = values[0] + 1
@@ -116,8 +118,12 @@ def IDDFS(matrix,values,depth,maxDepth):
             return matrix
         distances,positions = get_distances(matrix,values)
         for position in positions:
-           matrix,values = Transition(matrix,values,position)
-           result = IDDFS(matrix,values, depth + 1, maxDepth)
+           if isInMAtrix(position[0],position[1]):
+            matrix,values = Transition(matrix,values,position)
+            if matrix is not None and values is not None:  
+                 result = IDDFS(matrix,values, depth + 1, maxDepth)
+            else:
+                return 
         return None   
 
 def Solve_IDDFS(matrix,values):
