@@ -32,13 +32,17 @@ def Initialisation_State() :
     value = [1,0] 
 
     return matrix, value
-
+#Final state solved(elemntele in afara de 0 sunt ordonate crescator)
 def Final_State_Verif(matrix):
-
+    values_matrix=[]
     for i in range(3):
        for j in range(3):
-            if(matrix[i][j] != 3*i +j):  
-             return False
+            if(matrix[i][j] != 0):  
+               values_matrix.append(matrix[i][j])
+
+    for i in range(1, len(values_matrix)):
+       if values_matrix[i] < values_matrix[i - 1]:
+            return False
     return True
 
 # 3. Tranzitia este reprezentata de o actiune de schimb intre valoriile de pe pozitia in care am valoarea 0 si un vecin (up,down,left,rights)
@@ -121,8 +125,16 @@ def Heuristic(matrix,values):
     # matrix[values[0],values[1]] = const  
 
 #4. Strategia IDFS : Se alege in mod iterativ cate o adancime maxima si se exploreaza vecinii pana la acea adancime. Daca am dat peste o solutie,algorithmul se incheie.
+def Not_Repeat_State(matrix,unique_matrices):
+    if matrix.tostring() in unique_matrices:
+      unique_matrices.add(matrix.tostring())  
+      return True
+    else:
+      return False
 
-def IDDFS(cont,matrix,values,depth,maxDepth):
+
+
+def IDDFS(unique_matrices,matrix,values,depth,maxDepth):
         if depth > maxDepth:
             return None
         if(Final_State_Verif(matrix)) :
@@ -133,28 +145,32 @@ def IDDFS(cont,matrix,values,depth,maxDepth):
         # print(values,positions)
         # print('--------------')
         for position in positions:
-           if isInMAtrix(position[0],position[1]):
+           if isInMAtrix(position[0],position[1]) and !Not_Repeat_State(matrix,unique_matrices):
             #print(cont)
+            before_state = values.copy()
             matrix,values = Transition(matrix,values,position)
             if matrix is not None and values is not None:
                  print(matrix)  
-                 result = IDDFS(cont+1,matrix,values, depth + 1, maxDepth)
+                 result = IDDFS(before_state,matrix,values, depth + 1, maxDepth)
         return None   
+
+
 
 def Solve_IDDFS(matrix,values):
         
         maxDepth = 0
         depth = 0
+        before_state = [-1,-1]
         while True :
           #print(depth)
-          result = IDDFS(0,matrix,values,depth,maxDepth)
+          result = IDDFS(before_state,matrix,values,depth,maxDepth)
           if result is not None :
             return result
           maxDepth += 1 
 
 if __name__ == '__main__':
     matrix,values = Initialisation_State() 
-    
+    unique_matrices = set()
   ###########################  
     # print (matrix,values)
     # n_up = values[0] + 1  # urc pe linie
