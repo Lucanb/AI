@@ -193,12 +193,12 @@ if __name__ == '__main__':
                 print(len(greedy_solution) - 1)
                 print(timeout - start)
 
-            start = time.time()
-            iddfs_solution = IDDFS(puzzle, 31)
-            timeout = time.time()
-            if iddfs_solution:
-                print('IDDFS solution:')
-                for state in iddfs_solution:
-                    print(state)
-                print(len(iddfs_solution) - 1)
-                print(timeout - start)     
+        start = time.time()
+        iddfs_solution = IDDFS(puzzle, 31)
+        timeout = time.time()
+        if iddfs_solution:
+            print('IDDFS solution:')
+            for state in iddfs_solution:
+                print(state)
+            print(len(iddfs_solution) - 1)
+            print(timeout - start)     
