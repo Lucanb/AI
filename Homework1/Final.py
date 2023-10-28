@@ -3,7 +3,60 @@ import time
 from queue import PriorityQueue
 import numpy as np
 
-class SolvePuzzle:
+class SolvePuzzle2:
+    def __init__(self):
+        self.initial_state = None
+    def Verif(self,state):
+      values_matrix=[]
+      for i in range(3):
+       for j in range(3):
+            if(state[i][j] != 0):  
+               values_matrix.append(state[i][j])
+
+      for i in range(1, len(values_matrix)):
+       if values_matrix[i] < values_matrix[i - 1]:
+            return False
+      return True 
+    
+    def posNeigbourhood(self,state):
+       neighbours = []
+       row,col = None,None
+
+       for i in range(3):
+          for j in range(3):
+           if state[i][j] == 0:
+              row,col=i,j
+       vec = [(0,1),(0,-1),(1,0),(-1,0)]
+       for l,p in vec:
+                 newRow = row + l
+                 newCol = col + p
+                 if 0<=newRow and newRow < 3 and newCol>=0  and newCol < 3:
+                    newState = [row[:] for row in state]
+                    newState[row][col],newState[newRow][newCol]=newState[newRow][newCol],newState[row][col]
+                    neighbours.append(newState)
+
+       return neighbours
+
+    def IDDFS(self,initialState):
+      self.initial_state = initialState
+      DepthMax = 0
+      while True:
+          visited = set()     
+          stack = deque([(self.initial_state,0)])
+
+          while stack:
+             state,depth = stack.pop()
+             visited.add(str(state))
+             print(state)
+             if self.Verif(state):
+                  return state
+             if depth < DepthMax:
+                for position in self.posNeigbourhood(state):
+                   if str(position) not in visited:
+                      stack.append((position,depth + 1)) 
+          DepthMax += 1
+       
+class SolvePuzzle3:
     def __init__(self,initial_state):
         self.initial_state = initial_state
     def Verif(self,state):
@@ -105,6 +158,22 @@ def IDDFS(puzzle, max_depth):
         return None
 
 if __name__ == '__main__':
+
+    initial_state = [
+        [2, 7, 5], 
+        [0, 8, 4], 
+        [3, 1, 6]
+    ]
+
+    puzzle = SolvePuzzle2()
+    result = puzzle.IDDFS(initial_state)
+
+    if result:
+        print(result)
+    else:
+        print("Failure") 
+
+
     instances = [np.array([[8, 6, 7], [2, 5, 4], [0, 3, 1]]),
                  np.array([[2, 5, 3], [1, 0, 6], [4, 7, 8]]),
                  np.array([[8, 7, 1], [6, 0, 2], [5, 4, 3]])]
@@ -112,27 +181,24 @@ if __name__ == '__main__':
     heuristics = [manhattanDistance, hammingDistance, euclidDistance]
 
     for instances in instances:
-        puzzle = SolvePuzzle(instances)
+        puzzle = SolvePuzzle3(instances)
         for heuristic in heuristics:
             start = time.time()
             greedy_solution = Greedy(puzzle, heuristic)
             timeout = time.time()
             if greedy_solution:
-                print('Greedy solutions:')
                 print(heuristic.__name__)
                 for state in greedy_solution:
                     print(state)
                 print(len(greedy_solution) - 1)
                 print(timeout - start)
-            else:
-                print('Not found solution Greedy',heuristic.__name__)
 
-        start = time.time()
-        iddfs_solution = IDDFS(puzzle, 31)
-        timeout = time.time()
-        if iddfs_solution:
-         print('IDDFS solution:')
-        for state in iddfs_solution:
-             print(state)
-        print(len(iddfs_solution) - 1)
-        print(timeout - start)     
+            start = time.time()
+            iddfs_solution = IDDFS(puzzle, 31)
+            timeout = time.time()
+            if iddfs_solution:
+                print('IDDFS solution:')
+                for state in iddfs_solution:
+                    print(state)
+                print(len(iddfs_solution) - 1)
+                print(timeout - start)     

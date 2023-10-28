@@ -53,10 +53,6 @@ class SolvePuzzle:
                       stack.append((position,depth + 1)) 
           DepthMax += 1
 
-    def printState(self,state):
-       for row in state:
-            print(' '.join(map(str,row)))
-
 if __name__ == '__main__':
     initial_state = [
         [2, 7, 5], 
@@ -68,10 +64,9 @@ if __name__ == '__main__':
     result = puzzle.IDDFS(initial_state)
 
     if result:
-        print("Soluție găsită:")
-        puzzle.print_state(result)
+        print(result)
     else:
-        print("Nu există soluție.")        
+        print("Failure")        
 
 
 
