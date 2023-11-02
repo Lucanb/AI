@@ -46,7 +46,7 @@ class SudokuSolver:
             row, col = cell
             if self.assignment[row][col] == 0:
                 domain = list(range(1, 10))
-                # random.shuffle(domain)
+                random.shuffle(domain)
 
                 for num in domain:
                     if self.verifAtrib(row, col, num):
@@ -59,7 +59,6 @@ class SudokuSolver:
 
             elif self.assignment[row][col] == -1:
                 domainp = list([2, 4, 6, 8])
-                # print(domain)
                 random.shuffle(domainp)
 
                 for num in domainp:
