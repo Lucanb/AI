@@ -61,7 +61,7 @@ class SudokuSolverMRV:
         row, col = self.MRVMethod()
         if self.assignment[row][col] == 0:
             domain = list(range(1, 10))
-            random.shuffle(domain)
+            #random.shuffle(domain)
 
             for num in domain:
                 if self.verifAtrib(row, col, num):
@@ -72,7 +72,7 @@ class SudokuSolverMRV:
                     self.assignment[row][col] = 0
         elif self.assignment[row][col] == -1:
             domain = list([2, 4, 6, 8])
-            random.shuffle(domain)
+            #random.shuffle(domain)
 
             for num in domain:
                 if self.verifAtrib(row, col, num):
