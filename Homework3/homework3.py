@@ -2,12 +2,12 @@ from math import inf as infinite
 
 class TicTacToe:
     def __init__(self):
-        self.HUMAN_PLAYER = -1
-        self.COMPUTER_PLAYER = +1
-        self.game_board = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-        self.computer_moves = []
-        self.human_moves = []
-        self.remaining_values = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        self.PLAYER = -1
+        self.AI = +1
+        self.matrix = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        self.aiChosenValues = []
+        self.playerChosenValues = []
+        self.values_domain = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     def get_cell_value(self, x, y):
         if x == 0 and y == 0:
@@ -30,9 +30,9 @@ class TicTacToe:
             return 8
 
     def evaluate_board(self, state):
-        if self.is_winner(state, self.COMPUTER_PLAYER):
+        if self.is_winner(state, self.AI):
             score = +1
-        elif self.is_winner(state, self.HUMAN_PLAYER):
+        elif self.is_winner(state, self.PLAYER):
             score = -1
         else:
             score = 0
@@ -56,7 +56,7 @@ class TicTacToe:
             return False
 
     def is_game_over(self, state):
-        return self.is_winner(state, self.HUMAN_PLAYER) or self.is_winner(state, self.COMPUTER_PLAYER)
+        return self.is_winner(state, self.PLAYER) or self.is_winner(state, self.AI)
 
     def get_empty_cells(self, state):
         cells = []
@@ -81,10 +81,10 @@ class TicTacToe:
             return False
 
     def perform_minimax(self, state, depth, player):
-        if player == self.COMPUTER_PLAYER:
-            best = [-1, -1, -infinite]
+        if player == self.AI:
+            best_score = [-1, -1, -infinite]
         else:
-            best = [-1, -1, infinite]
+            best_score = [-1, -1, infinite]
 
         if depth == 0 or self.is_game_over(state):
             score = self.evaluate_board(state)
@@ -97,31 +97,31 @@ class TicTacToe:
             state[x][y] = 0
             score[0], score[1] = x, y
 
-            if player == self.COMPUTER_PLAYER:
-                if score[2] > best[2]:
-                    best = score
+            if player == self.AI:
+                if score[2] > best_score[2]:
+                    best_score = score
             else:
-                if score[2] < best[2]:
-                    best = score
+                if score[2] < best_score[2]:
+                    best_score = score
 
-        return best
+        return best_score
 
     def computer_move(self):
-        depth = len(self.get_empty_cells(self.game_board))
-        if depth == 0 or self.is_game_over(self.game_board):
+        depth = len(self.get_empty_cells(self.matrix))
+        if depth == 0 or self.is_game_over(self.matrix):
             return
         print("\n------------------------------------------")
         print("AI'S TURN")
-        move = self.perform_minimax(self.game_board, depth, self.COMPUTER_PLAYER)
+        move = self.perform_minimax(self.matrix, depth, self.AI)
         x, y = move[0], move[1]
-        self.make_move(x, y, self.COMPUTER_PLAYER, self.game_board)
+        self.make_move(x, y, self.AI, self.matrix)
         print("AI chooses position: ", self.get_cell_value(x, y))
-        self.computer_moves.append(self.get_cell_value(x, y))
-        self.remaining_values.remove(self.get_cell_value(x, y))
+        self.aiChosenValues.append(self.get_cell_value(x, y))
+        self.values_domain.remove(self.get_cell_value(x, y))
 
     def human_move(self):
-        depth = len(self.get_empty_cells(self.game_board))
-        if depth == 0 or self.is_game_over(self.game_board):
+        depth = len(self.get_empty_cells(self.matrix))
+        if depth == 0 or self.is_game_over(self.matrix):
             return
         move = -1
         moves = {
@@ -137,41 +137,41 @@ class TicTacToe:
         }
         print("\n------------------------------------------")
         print("Your TURN")
-        print("\nValues Left: ", self.remaining_values)
-        print("AI's Moves: ", self.computer_moves)
-        print("Your Moves: ", self.human_moves)
+        print("\nValues Left: ", self.values_domain)
+        print("AI's Moves: ", self.aiChosenValues)
+        print("Your Moves: ", self.playerChosenValues)
         print("\n------------------------------------------")
         while move < 1 or move > 9:
             move = int(input("Chose digits from 1 to 9 please: "))
             if move < 10 and move > 0:
                 coord = moves[move]
-                can_move = self.make_move(coord[0], coord[1], self.HUMAN_PLAYER, self.game_board)
+                can_move = self.make_move(coord[0], coord[1], self.PLAYER, self.matrix)
                 if not can_move:
                     print("Invalid move. Try again.")
                     move = -1
             else:
                 print("Invalid choice. Try again.")
-        self.human_moves.append(self.get_cell_value(coord[0], coord[1]))
-        self.remaining_values.remove(move)
+        self.playerChosenValues.append(self.get_cell_value(coord[0], coord[1]))
+        self.values_domain.remove(move)
 
     def start_game(self):
-        while len(self.get_empty_cells(self.game_board)) > 0 and not self.is_game_over(self.game_board):
+        while len(self.get_empty_cells(self.matrix)) > 0 and not self.is_game_over(self.matrix):
             self.human_move()
             self.computer_move()
-        if self.is_winner(self.game_board, self.HUMAN_PLAYER):
-            print("\nValues Left: ", self.remaining_values)
-            print("AI's Moves: ", self.computer_moves)
-            print("Your Moves: ", self.human_moves)
+        if self.is_winner(self.matrix, self.PLAYER):
+            print("\nValues Left: ", self.values_domain)
+            print("AI's Moves: ", self.aiChosenValues)
+            print("Your Moves: ", self.playerChosenValues)
             print("CONGRATULATIONS! You win!")
-        elif self.is_winner(self.game_board, self.COMPUTER_PLAYER):
-            print("\nValues Left: ", self.remaining_values)
-            print("AI's Moves: ", self.computer_moves)
-            print("Your Moves: ", self.human_moves)
+        elif self.is_winner(self.matrix, self.AI):
+            print("\nValues Left: ", self.values_domain)
+            print("AI's Moves: ", self.aiChosenValues)
+            print("Your Moves: ", self.playerChosenValues)
             print("YOU LOSE! Better luck next time.")
         else:
-            print("\nValues Left: ", self.remaining_values)
-            print("AI's Moves: ", self.computer_moves)
-            print("Your Moves: ", self.human_moves)
+            print("\nValues Left: ", self.values_domain)
+            print("AI's Moves: ", self.aiChosenValues)
+            print("Your Moves: ", self.playerChosenValues)
             print("It's a DRAW! Good game!")
 
 if __name__ == "__main__":
