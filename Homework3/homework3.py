@@ -106,7 +106,7 @@ class TicTacToe:
 
         return best_score
 
-    def computer_move(self):
+    def aiMove(self):
         depth = len(self.get_empty_cells(self.matrix))
         if depth == 0 or self.is_game_over(self.matrix):
             return
@@ -119,7 +119,7 @@ class TicTacToe:
         self.aiChosenValues.append(self.get_cell_value(x, y))
         self.values_domain.remove(self.get_cell_value(x, y))
 
-    def human_move(self):
+    def playerMove(self):
         depth = len(self.get_empty_cells(self.matrix))
         if depth == 0 or self.is_game_over(self.matrix):
             return
@@ -156,8 +156,8 @@ class TicTacToe:
 
     def start_game(self):
         while len(self.get_empty_cells(self.matrix)) > 0 and not self.is_game_over(self.matrix):
-            self.human_move()
-            self.computer_move()
+            self.playerMove()
+            self.aiMove()
         if self.is_winner(self.matrix, self.PLAYER):
             print("\nValues Left: ", self.values_domain)
             print("AI's Moves: ", self.aiChosenValues)
