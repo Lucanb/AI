@@ -84,10 +84,7 @@ class TicTacToe:
         return self.evaluate_board(state)
 
     def perform_minimax(self, state, depth, player):
-        def empty_cells(state):
-            return self.get_empty_cells(state)
 
-        def minimax(state, depth, player):
             if player == self.AI:
                 best = [-1, -1, -infinite]
             else:
@@ -97,10 +94,10 @@ class TicTacToe:
                 score = self.evaluate(state)
                 return [-1, -1, score]
 
-            for cell in empty_cells(state):
+            for cell in self.get_empty_cells(state):
                 x, y = cell[0], cell[1]
                 state[x][y] = player
-                score = minimax(state, depth - 1, -player)
+                score = self.perform_minimax(state, depth - 1, -player)
                 state[x][y] = 0
                 score[0], score[1] = x, y
 
@@ -112,8 +109,6 @@ class TicTacToe:
                         best = score
 
             return best
-
-        return minimax(state, depth, player)
 
     def aiMove(self):
         depth = len(self.get_empty_cells(self.matrix))
