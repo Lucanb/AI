@@ -56,8 +56,11 @@ class TicTacToe:
             return False
 
     def is_game_over(self, state):
-        return self.is_winner(state, self.PLAYER) or self.is_winner(state, self.AI)
-
+        for i in range(3):
+            for j in range(3):
+                if(state[i][j] == 0): 
+                  return self.is_winner(state, self.PLAYER) or self.is_winner(state, self.AI)
+        return False        
     def get_empty_cells(self, state):
         cells = []
         for x, row in enumerate(state):
