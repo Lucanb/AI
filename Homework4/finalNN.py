@@ -76,9 +76,9 @@ print(weights2)
 print("Final Weights (Output Layer):")
 print(weights_out)
 
-test_data = np.array([[11.65, 13.07, 0.8575, 5.108, 2.85, 5.209, 5.135]])
-test_predictions = forward_propagation(test_data, weights1, weights2, weights_out)
-predicted_class = np.argmax(test_predictions, axis=1) + 1
+# test_data = np.array([[11.65, 13.07, 0.8575, 5.108, 2.85, 5.209, 5.135]])
+# test_predictions = forward_propagation(test_data, weights1, weights2, weights_out)
+# predicted_class = np.argmax(test_predictions, axis=1) + 1
 
-print("Predicted Class for Test Data:")
-print(predicted_class)
+# print("Predicted Class for Test Data:")
+# print(predicted_class)
