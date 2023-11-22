@@ -37,7 +37,7 @@ def forward_propagation(input,weights1,weights2,weights_out):
     out_value = softmax(dot_product_out)
     return out_value
     
-def calculate_gradient(prediction,labels):
+def bias_lose(prediction,labels):
     epsilon = 1e-15
     prediction = np.clip(prediction, epsilon, 1 - epsilon)
     loss = -np.sum(labels * np.log(prediction)) / len(labels)
@@ -64,7 +64,7 @@ for epoch in range(epochs):
     hidden2 = softmax(np.dot(hidden1, weights2))
     predictions = forward_propagation(input_data, weights1, weights2, weights_out)
 
-    loss = calculate_gradient(predictions, labels)
+    loss = bias_lose(predictions, labels)
     weights1, weights2, weights_out = backward_propagation(input_data, predictions, labels, weights1, weights2, weights_out)
     if epoch % 100 == 0:
         print(f"Epoch {epoch}, Loss: {loss}")
