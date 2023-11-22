@@ -39,8 +39,8 @@ def forward_propagation(input,weights1,weights2,weights_out):
     
 def calculate_gradient(prediction,labels):
     epsilon = 1e-15
-    prediction = np.clip(predictions, epsilon, 1 - epsilon)
-    loss = -np.sum(labels * np.log(predictions)) / len(labels)
+    prediction = np.clip(prediction, epsilon, 1 - epsilon)
+    loss = -np.sum(labels * np.log(prediction)) / len(labels)
     return loss
 
 def backward_propagation(inputs,predictions,labels,weights1,weights2,weights_out):
