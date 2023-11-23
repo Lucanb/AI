@@ -48,77 +48,74 @@ weights2 = np.random.rand(hidden_layer_size1,hidden_layer_size2)
 
 weights_out = np.random.rand(hidden_layer_size2,output_size)
 
+biases1 = np.random.randn(1, hidden_layer_size1) * 0.01 
+biases2 = np.random.randn(1, hidden_layer_size2) * 0.01
+biases_out = np.random.randn(1, output_size) * 0.01
 
 def softmax(x):
-    e_x = np.exp(x - np.max(x,axis=1,keepdims = True))
-    return e_x/ np.sum(e_x,axis = 1,keepdims = True)
+    e_x = np.exp(x - np.max(x, axis=1, keepdims=True))
+    return e_x / np.sum(e_x, axis=1, keepdims=True)
 
-def forward_propagation(input,weights1,weights2,weights_out):
-    dot_product1 = np.dot(input,weights1)
+def forward_propagation(input, weights1, biases1, weights2, biases2, weights_out, biases_out):
+    dot_product1 = np.dot(input, weights1) + biases1
     hidden1_val = softmax(dot_product1)
-    dot_product2 = np.dot(hidden1_val,weights2)
+    dot_product2 = np.dot(hidden1_val, weights2) + biases2
     hidden2_val = softmax(dot_product2)
-    dot_product_out = np.dot(hidden2_val,weights_out)
+    dot_product_out = np.dot(hidden2_val, weights_out) + biases_out
     out_value = softmax(dot_product_out)
     return out_value
-    
-def bias_lose(prediction,labels):
+
+def bias_lose(prediction, labels):
     epsilon = 1e-15
     prediction = np.clip(prediction, epsilon, 1 - epsilon)
     loss = -np.sum(labels * np.log(prediction)) / len(labels)
     return loss
 
-def backward_propagation(inputs,predictions,labels,weights1,weights2,weights_out):
+def backward_propagation(inputs, predictions, labels, weights1, biases1, weights2, biases2, weights_out, biases_out):
     error_out = predictions - labels
-    gradient_out = np.dot(hidden2.T,error_out) / len(inputs)
-    error_hidden2 = np.dot(error_out,weights_out.T)
-    gradient_hidden2 = np.dot(hidden1.T,error_hidden2) / len(inputs)
-    error_hidden1 = np.dot(error_hidden2,weights2.T)
-    gradient_hidden1 = np.dot(inputs.T,error_hidden1) / len(inputs)
+    gradient_out = np.dot(hidden2.T, error_out) / len(inputs)
+    error_hidden2 = np.dot(error_out, weights_out.T)
+    gradient_hidden2 = np.dot(hidden1.T, error_hidden2) / len(inputs)
+    error_hidden1 = np.dot(error_hidden2, weights2.T)
+    gradient_hidden1 = np.dot(inputs.T, error_hidden1) / len(inputs)
     weights_out = weights_out - learning_rate * gradient_out
+    biases_out = biases_out - learning_rate * np.sum(error_out, axis=0, keepdims=True) / len(inputs)
     weights2 = weights2 - learning_rate * gradient_hidden2
+    biases2 = biases2 - learning_rate * np.sum(error_hidden2, axis=0, keepdims=True) / len(inputs)
     weights1 = weights1 - learning_rate * gradient_hidden1
+    biases1 = biases1 - learning_rate * np.sum(error_hidden1, axis=0, keepdims=True) / len(inputs)
 
-    return weights1,weights2,weights_out
+    return weights1, biases1, weights2, biases2, weights_out, biases_out
 
 for epoch in range(epochs):
-
-    hidden1 = softmax(np.dot(train_input_data, weights1))
-    hidden2 = softmax(np.dot(hidden1, weights2))
-    predictions = forward_propagation(train_input_data, weights1, weights2, weights_out)
+    hidden1 = softmax(np.dot(train_input_data, weights1) + biases1)
+    hidden2 = softmax(np.dot(hidden1, weights2) + biases2)
+    predictions = forward_propagation(train_input_data, weights1, biases1, weights2, biases2, weights_out, biases_out)
 
     loss = bias_lose(predictions, train_labels)
-    weights1, weights2, weights_out = backward_propagation(train_input_data, predictions, train_labels, weights1, weights2, weights_out)
+    weights1, biases1, weights2, biases2, weights_out, biases_out = backward_propagation(train_input_data, predictions, train_labels, weights1, biases1, weights2, biases2, weights_out, biases_out)
     if epoch % 100 == 0:
         print(f"Epoch {epoch}, Loss: {loss}")
 
-def softmax2(x):
-    if len(x.shape) > 1:
-        e_x = np.exp(x - np.max(x, axis=1, keepdims=True))
-        return e_x / np.sum(e_x, axis=1, keepdims=True)
-    else:
-        e_x = np.exp(x - np.max(x))
-        return e_x / np.sum(e_x)
-
-def forward_propagation_single(input_vector, weights1, weights2, weights_out):
-    dot_product1 = np.dot(input_vector, weights1)
-    hidden1_val = softmax2(dot_product1)
-    dot_product2 = np.dot(hidden1_val, weights2)
-    hidden2_val = softmax2(dot_product2)
-    dot_product_out = np.dot(hidden2_val, weights_out)
-    out_value = softmax2(dot_product_out)
+def forward_propagation_single(input_vector, weights1, biases1, weights2, biases2, weights_out, biases_out):
+    dot_product1 = np.dot(input_vector, weights1) + biases1
+    hidden1_val = softmax(dot_product1)
+    dot_product2 = np.dot(hidden1_val, weights2) + biases2
+    hidden2_val = softmax(dot_product2)
+    dot_product_out = np.dot(hidden2_val, weights_out) + biases_out
+    out_value = softmax(dot_product_out)
     return out_value
 
 print("Final Weights Layer 1:")
 print(weights1)
-print("Final Weights Layer 2:")
+print("Final Biases Layer 1:")
 print(weights2)
-print("Final Weights Output Layer:")
+print("Final Biases Layer 2:")
 print(weights_out)
 
 correct_predictions = 0
 for test_input, test_label in zip(test_input_data, test_labels):
-    test_prediction = forward_propagation_single(test_input, weights1, weights2, weights_out)
+    test_prediction = forward_propagation_single(test_input, weights1, biases1, weights2, biases2, weights_out, biases_out)
 
     predicted_class = np.argmax(test_prediction) + 1
     true_class = np.argmax(test_label) + 1
