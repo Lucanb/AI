@@ -128,16 +128,10 @@ for epoch in range(epochs):
 
 print("Final Weights Layer 1:")
 print(weights1)
-print("Final Biases Layer 1:")
-print(biases1)
 print("Final Weights Layer 2:")
 print(weights2)
-print("Final Biases Layer 2:")
-print(biases2)
 print("Final Weights Output Layer:")
 print(weights_out)
-print("Final Biases Output Layer:")
-print(biases_out)
 
 correct_predictions = 0
 for test_input, test_label in zip(test_input_data, test_labels):
