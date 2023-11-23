@@ -12,12 +12,10 @@ class_1_indices = np.where(DataClasses == 1)[0]
 class_2_indices = np.where(DataClasses == 2)[0]
 class_3_indices = np.where(DataClasses == 3)[0]
 
-# Randomly shuffle indices
 np.random.shuffle(class_1_indices)
 np.random.shuffle(class_2_indices)
 np.random.shuffle(class_3_indices)
 
-# Select 21 samples from each class for testing
 test_indices = np.concatenate([
     class_1_indices[:21],
     class_2_indices[:21],
