@@ -109,11 +109,11 @@ def forward_propagation_single(input_vector, weights1, weights2, weights_out):
     out_value = softmax2(dot_product_out)
     return out_value
 
-print("Final Weights (Layer 1):")
+print("Final Weights Layer 1:")
 print(weights1)
-print("Final Weights (Layer 2):")
+print("Final Weights Layer 2:")
 print(weights2)
-print("Final Weights (Output Layer):")
+print("Final Weights Output Layer:")
 print(weights_out)
 
 correct_predictions = 0
