@@ -85,7 +85,6 @@ def backward_propagation(inputs, predictions, labels, weights1, biases1, weights
     hidden1_val = softmax(dot_product1)
     dot_product2 = np.dot(hidden1_val, weights2) + biases2
     hidden2_val = softmax(dot_product2)
-    dot_product_out = np.dot(hidden2_val, weights_out) + biases_out
     error_out = predictions - labels
     gradient_out = np.dot(hidden2_val.T, error_out) / len(inputs)
     softmax_hidden2_derivative = softmax_derivative(dot_product2)
