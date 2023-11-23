@@ -8,7 +8,39 @@ class_number = len(np.unique(DataClasses))
 
 input_data = data[:,:-1]
 
-labels = np.eye(class_number)[DataClasses.astype(int) - 1] #one-hot encoding
+class_1_indices = np.where(DataClasses == 1)[0]
+class_2_indices = np.where(DataClasses == 2)[0]
+class_3_indices = np.where(DataClasses == 3)[0]
+
+# Randomly shuffle indices
+np.random.shuffle(class_1_indices)
+np.random.shuffle(class_2_indices)
+np.random.shuffle(class_3_indices)
+
+# Select 21 samples from each class for testing
+test_indices = np.concatenate([
+    class_1_indices[:21],
+    class_2_indices[:21],
+    class_3_indices[:21]
+])
+
+# The remaining samples will be used for training
+train_indices = np.setdiff1d(np.arange(len(data)), test_indices)
+
+# Separate data into training and test sets
+train_data = data[train_indices]
+test_data = data[test_indices]
+
+train_input_data = train_data[:, :-1]
+test_input_data = test_data[:, :-1]
+
+train_labels = np.eye(class_number)[train_data[:, -1].astype(int) - 1] #one-hot encoding
+test_labels = np.eye(class_number)[test_data[:, -1].astype(int) - 1] #one-hot encoding
+
+print(train_input_data.shape)
+print(test_input_data.shape)
+
+#labels = np.eye(class_number)[DataClasses.astype(int) - 1] #one-hot encoding
 
 learning_rate = 0.01
 epochs = 1000
@@ -56,18 +88,33 @@ def backward_propagation(inputs,predictions,labels,weights1,weights2,weights_out
 
     return weights1,weights2,weights_out
 
-
-
 for epoch in range(epochs):
 
-    hidden1 = softmax(np.dot(input_data, weights1))
+    hidden1 = softmax(np.dot(train_input_data, weights1))
     hidden2 = softmax(np.dot(hidden1, weights2))
-    predictions = forward_propagation(input_data, weights1, weights2, weights_out)
+    predictions = forward_propagation(train_input_data, weights1, weights2, weights_out)
 
-    loss = bias_lose(predictions, labels)
-    weights1, weights2, weights_out = backward_propagation(input_data, predictions, labels, weights1, weights2, weights_out)
+    loss = bias_lose(predictions, train_labels)
+    weights1, weights2, weights_out = backward_propagation(train_input_data, predictions, train_labels, weights1, weights2, weights_out)
     if epoch % 100 == 0:
         print(f"Epoch {epoch}, Loss: {loss}")
+
+def softmax2(x):
+    if len(x.shape) > 1:
+        e_x = np.exp(x - np.max(x, axis=1, keepdims=True))
+        return e_x / np.sum(e_x, axis=1, keepdims=True)
+    else:
+        e_x = np.exp(x - np.max(x))
+        return e_x / np.sum(e_x)
+
+def forward_propagation_single(input_vector, weights1, weights2, weights_out):
+    dot_product1 = np.dot(input_vector, weights1)
+    hidden1_val = softmax2(dot_product1)
+    dot_product2 = np.dot(hidden1_val, weights2)
+    hidden2_val = softmax2(dot_product2)
+    dot_product_out = np.dot(hidden2_val, weights_out)
+    out_value = softmax2(dot_product_out)
+    return out_value
 
 print("Final Weights (Layer 1):")
 print(weights1)
@@ -75,6 +122,19 @@ print("Final Weights (Layer 2):")
 print(weights2)
 print("Final Weights (Output Layer):")
 print(weights_out)
+
+correct_predictions = 0
+for test_input, test_label in zip(test_input_data, test_labels):
+    test_prediction = forward_propagation_single(test_input, weights1, weights2, weights_out)
+
+    predicted_class = np.argmax(test_prediction) + 1
+    true_class = np.argmax(test_label) + 1
+    if predicted_class == true_class:
+        correct_predictions += 1
+
+accuracy = correct_predictions / len(test_input_data)
+print(f"Accuracy on Test Data: {accuracy * 100:.2f}%")
+
 
 # test_data = np.array([[11.65, 13.07, 0.8575, 5.108, 2.85, 5.209, 5.135]])
 # test_predictions = forward_propagation(test_data, weights1, weights2, weights_out)
