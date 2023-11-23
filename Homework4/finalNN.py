@@ -23,11 +23,8 @@ test_indices = np.concatenate([
     class_2_indices[:21],
     class_3_indices[:21]
 ])
-
-# The remaining samples will be used for training
 train_indices = np.setdiff1d(np.arange(len(data)), test_indices)
 
-# Separate data into training and test sets
 train_data = data[train_indices]
 test_data = data[test_indices]
 
@@ -39,8 +36,6 @@ test_labels = np.eye(class_number)[test_data[:, -1].astype(int) - 1] #one-hot en
 
 print(train_input_data.shape)
 print(test_input_data.shape)
-
-#labels = np.eye(class_number)[DataClasses.astype(int) - 1] #one-hot encoding
 
 learning_rate = 0.01
 epochs = 1000
