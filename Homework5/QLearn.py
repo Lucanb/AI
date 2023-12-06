@@ -1,66 +1,109 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Dimensiunile mediului
-num_rows = 7
-num_cols = 10
-start_state = (3, 0)
-goal_state = (3, 7)
+class WindyGridWorld:
+    def __init__(self, rows, cols, start, goal, wind):
+        self.rows = rows
+        self.cols = cols
+        self.start = start
+        self.goal = goal
+        self.wind = wind
+        self.agent_position = start
+        self.episode_finished = False
+        self.total_reward = 0
+
+    def reset(self):
+        self.agent_position = self.start
+        self.episode_finished = False
+        self.total_reward = 0
+
+    def move_agent(self, action):
+        wind_effect = self.wind[self.agent_position[1]]
+        next_row = self.agent_position[0] - wind_effect
+        next_col = self.agent_position[1]
+
+        if action == 0:  # Sus
+            next_row += 1
+        elif action == 1:  # Jos
+            next_row -= 1
+        elif action == 2:  # Stânga
+            next_col -= 1
+        elif action == 3:  # Dreapta
+            next_col += 1
+
+        next_row = max(0, min(next_row, self.rows - 1))  # Asigură că rămâne în limitele de sus și jos
+        next_col = max(0, min(next_col, self.cols - 1))  # Asigură că rămâne în limitele stânga-dreapta
+
+        # Asigură că agentul rămâne pe loc dacă este la marginea de sus și vântul încearcă să-l împingă în afara mediului
+        if self.agent_position[0] == 0 and wind_effect > 0 and action == 0:
+            next_row = self.agent_position[0]
+
+        self.agent_position = (next_row, next_col)
+
+    def take_action(self, action):
+        self.move_agent(action)
+        self.total_reward += -1
+        if self.agent_position == self.goal:
+            self.episode_finished = True
+
+    def get_state(self):
+        return self.agent_position
+
+    def get_reward(self):
+        return self.total_reward
+
+    def is_episode_finished(self):
+        return self.episode_finished
+
+def q_learning(env, num_episodes=1000, alpha=0.1, gamma=0.9, epsilon=0.1):
+    Q = np.zeros((env.rows, env.cols, 4))  # 0: sus, 1: jos, 2: stânga, 3: dreapta
+    rewards_per_episode = []
+
+    for episode in range(num_episodes):
+        env.reset()
+        state = env.get_state()
+        total_reward = 0
+
+        while not env.is_episode_finished():
+            if np.random.rand() < epsilon:
+                action = np.random.choice(4)
+            else:
+                action = np.argmax(Q[state[0], state[1]])
+
+            env.take_action(action)
+            next_state = env.get_state()
+            reward = env.get_reward()
+
+            Q[state[0], state[1], action] += alpha * (reward + gamma * np.max(Q[next_state[0], next_state[1]]) - Q[state[0], state[1], action])
+
+            state = next_state
+            total_reward += reward
+
+        rewards_per_episode.append(total_reward)
+
+        # Actualizează epsilon pentru explorare
+        epsilon = max(epsilon * 0.99, 0.1)
+
+    policy = np.argmax(Q, axis=2)
+    print("Politica determinată de algoritm:")
+    print(policy)
+
+    # Afișează graficul recompenselor în raport cu episodul
+    plt.plot(rewards_per_episode)
+    plt.xlabel('Episod')
+    plt.ylabel('Recompensă totală')
+    plt.title('Convergența algoritmului Q-learning')
+    plt.show()
+
+# Setările mediului
+rows = 7
+cols = 10
+start = (3, 0)
+goal = (3, 7)
 wind = [0, 0, 0, 1, 1, 1, 2, 2, 1, 0]
-num_actions = 4
-learning_rate = 0.5
-discount_factor = 0.9
-epsilon = 0.1
-num_episodes = 1000
-Q = np.zeros((num_rows, num_cols, num_actions))
 
-# Funcție pentru a alege o acțiune bazată pe politica Q cu epsilon-greedy
-def choose_action(state):
-    if np.random.rand() < epsilon:
-        return np.random.randint(num_actions)
-    else:
-        return np.argmax(Q[state])
+# Crează mediu
+env = WindyGridWorld(rows, cols, start, goal, wind)
 
-# Funcție pentru a lua o acțiune
-def take_action(state, action):
-    wind_effect = min(wind[state[1]], state[0])
-    next_state = (max(0, min(num_rows-1, state[0] - wind_effect)), 
-                  max(0, min(num_cols-1, state[1] + [-1, 1, 0, 0][action])))
-    return next_state
-
-# Simulare Q-learning
-rewards_per_episode = []
-max_steps_per_episode = 1000  # Modificați acest număr după necesități
-
-for episode in range(num_episodes):
-    state = start_state
-    total_reward = 0
-    steps = 0  # Adăugăm un contor pentru numărul de pași
-
-    while state != goal_state and steps < max_steps_per_episode:
-        action = choose_action(state)
-        next_state = take_action(state, action)
-        
-        reward = -1  # Răsplată constantă pentru fiecare tranziție
-        
-        Q[state][action] = Q[state][action] + learning_rate * \
-                           (reward + discount_factor * np.max(Q[next_state]) - Q[state][action])
-        
-        state = next_state
-        total_reward += reward
-        steps += 1  # Incrementăm contorul de pași
-
-    rewards_per_episode.append(total_reward)
-
-# Afișarea politicii
-policy = np.argmax(Q, axis=2)
-
-print("Politica determinată de algoritm:")
-print(policy)
-
-# Bonus: Verificați convergența algoritmului
-plt.plot(rewards_per_episode)
-plt.xlabel('Episod')
-plt.ylabel('Recompensă totală')
-plt.title('Convergența algoritmului Q-learning')
-plt.show()
+# Antrenează agentul folosind Q-learning
+q_learning(env)
