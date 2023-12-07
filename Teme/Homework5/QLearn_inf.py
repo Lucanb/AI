@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 
 class WindyGridWorld:
     def __init__(self, rows, cols, start, goal, wind):
@@ -45,6 +46,8 @@ class WindyGridWorld:
         self.total_reward += -1
         if self.agent_position == self.goal:
             self.episode_finished = True
+            return action,True
+        return action,False
 
     def get_state(self):
         return self.agent_position
@@ -57,7 +60,6 @@ class WindyGridWorld:
 
 def q_learning(env, num_episodes=1000, alpha=0.1, gamma=0.9, epsilon=1):
     Q = np.zeros((env.rows, env.cols, 4))  # 0: sus, 1: jos, 2: stânga, 3: dreapta
-    
     rewards_per_episode = []
 
     for episode in range(num_episodes):
@@ -70,15 +72,22 @@ def q_learning(env, num_episodes=1000, alpha=0.1, gamma=0.9, epsilon=1):
                 action = np.random.choice(4)
             else:
                 action = np.argmax(Q[state[0], state[1]])
+                #print(Q[state[0], state[1]])
 
-            env.take_action(action)
-            next_state = env.get_state()
-            reward = env.get_reward()
+            anterior_state = env.get_state()
+            action_done,verif = env.take_action(action)
 
-            Q[state[0], state[1], action] += alpha * (reward + gamma * np.max(Q[next_state[0], next_state[1]]) - Q[state[0], state[1], action])
+            if verif == True:
+                Q[anterior_state[0],anterior_state[1],action_done] = math.inf
+            else:
+                
+                next_state = env.get_state()
+                reward = env.get_reward()
 
-            state = next_state
-            total_reward += reward
+                Q[state[0], state[1], action] += alpha * (reward + gamma * np.max(Q[next_state[0], next_state[1]]) - Q[state[0], state[1], action])
+
+                state = next_state
+                total_reward += reward
 
         rewards_per_episode.append(total_reward)
 
