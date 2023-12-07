@@ -2,118 +2,105 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-class WindyGridWorld:
+class AgentMove:
     def __init__(self, rows, cols, start, goal, wind):
+        self.finish_episode = False
         self.rows = rows
         self.cols = cols
         self.start = start
         self.goal = goal
         self.wind = wind
-        self.agent_position = start
-        self.episode_finished = False
+        self.rewards_ep = []
+        self.agent_coord = start
         self.total_reward = 0
 
-    def reset(self):
-        self.agent_position = self.start
-        self.episode_finished = False
+    def get_state(self):
+        return self.agent_coord
+
+    def get_totalreward(self):
+        return self.total_reward
+
+    def end_episode(self):
+        return self.finish_episode
+
+    def initial_pos(self):
+        self.agent_coord = self.start
+        self.finish_episode = False
         self.total_reward = 0
 
     def move_agent(self, action):
-        wind_effect = self.wind[self.agent_position[1]]
-        next_row = self.agent_position[0] - wind_effect
-        next_col = self.agent_position[1]
+        wind_effect = self.wind[self.agent_coord[1]]
+        next_row = self.agent_coord[0] - wind_effect
+        next_col = self.agent_coord[1]
 
-        if action == 0:  # Sus
+        if action == 0:
             next_row += 1
-        elif action == 1:  # Jos
+        elif action == 1:
             next_row -= 1
-        elif action == 2:  # Stânga
+        elif action == 2:
             next_col -= 1
-        elif action == 3:  # Dreapta
+        elif action == 3:
             next_col += 1
 
-        next_row = max(0, min(next_row, self.rows - 1))  # Asigură că rămâne în limitele de sus și jos
-        next_col = max(0, min(next_col, self.cols - 1))  # Asigură că rămâne în limitele stânga-dreapta
+        next_row = max(0, min(next_row, self.rows - 1))
+        next_col = max(0, min(next_col, self.cols - 1))
 
-        # Asigură că agentul rămâne pe loc dacă este la marginea de sus și vântul încearcă să-l împingă în afara mediului
-        if self.agent_position[0] == 0 and wind_effect > 0 and action == 0:
-            next_row = self.agent_position[0]
+        if self.agent_coord[0] == 0 and wind_effect > 0 and action == 0:
+            next_row = self.agent_coord[0]
+        self.agent_coord = (next_row, next_col)
 
-        self.agent_position = (next_row, next_col)
-
-    def take_action(self, action):
+    def choose_move(self, action):
         self.move_agent(action)
         self.total_reward += -1
-        if self.agent_position == self.goal:
-            self.episode_finished = True
-            return action,True
-        return action,False
+        if self.agent_coord == self.goal:
+            self.finish_episode = True
+        return self.finish_episode,self.get_state()
 
-    def get_state(self):
-        return self.agent_position
-
-    def get_reward(self):
-        return self.total_reward
-
-    def is_episode_finished(self):
-        return self.episode_finished
-
-def q_learning(env, num_episodes=1000, alpha=0.1, gamma=0.9, epsilon=1):
-    Q = np.zeros((env.rows, env.cols, 4))  # 0: sus, 1: jos, 2: stânga, 3: dreapta
-    rewards_per_episode = []
+def q_learning(myAgent, num_episodes=1000, alpha=0.1, gamma=0.9, epsilon=1):
+    Q = np.zeros((myAgent.rows, myAgent.cols, 4))
 
     for episode in range(num_episodes):
-        env.reset()
-        state = env.get_state()
+        myAgent.initial_pos()
+        state = myAgent.get_state()
         total_reward = 0
 
-        while not env.is_episode_finished():
+        while not myAgent.end_episode():
             if np.random.rand() < epsilon:
                 action = np.random.choice(4)
             else:
                 action = np.argmax(Q[state[0], state[1]])
-                #print(Q[state[0], state[1]])
 
-            anterior_state = env.get_state()
-            action_done,verif = env.take_action(action)
-
+            action_done = action
+            myAgent.choose_move(action)
+            verif,anterior_state =12,[1,2]
             if verif == True:
-                Q[anterior_state[0],anterior_state[1],action_done] = math.inf
+                Q[anterior_state[0], anterior_state[1], action_done] = math.inf
             else:
-                
-                next_state = env.get_state()
-                reward = env.get_reward()
-
+                next_state = myAgent.get_state()
+                reward = myAgent.get_totalreward()
                 Q[state[0], state[1], action] += alpha * (reward + gamma * np.max(Q[next_state[0], next_state[1]]) - Q[state[0], state[1], action])
-
                 state = next_state
                 total_reward += reward
 
-        rewards_per_episode.append(total_reward)
-
-        # Actualizează epsilon pentru explorare
+        myAgent.rewards_ep.append(total_reward)
         epsilon = max(epsilon * 0.99, 0.1)
 
     policy = np.argmax(Q, axis=2)
-    print("Politica determinată de algoritm:")
-    print(policy)
+    return policy, myAgent.rewards_ep
 
-    # Afișează graficul recompenselor în raport cu episodul
-    plt.plot(rewards_per_episode)
-    plt.xlabel('Episod')
-    plt.ylabel('Recompensă totală')
-    plt.title('Convergența algoritmului Q-learning')
-    plt.show()
-
-# Setările mediului
 rows = 7
 cols = 10
 start = (3, 0)
 goal = (3, 7)
 wind = [0, 0, 0, 1, 1, 1, 2, 2, 1, 0]
 
-# Crează mediu
-env = WindyGridWorld(rows, cols, start, goal, wind)
+myAgent = AgentMove(rows, cols, start, goal, wind)
 
-# Antrenează agentul folosind Q-learning
-q_learning(env)
+policy, rewards_ep = q_learning(myAgent)
+print("Algorithm Policy :\n")
+print(policy)
+plt.plot(myAgent.rewards_ep)
+plt.xlabel('Episod')
+plt.ylabel('Reward')
+plt.title('QLearn Convergence')
+plt.show()
