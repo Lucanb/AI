@@ -1,1 +1,0 @@
-print('ChessProject initialised')

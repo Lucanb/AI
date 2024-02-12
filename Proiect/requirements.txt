@@ -1,5 +1,0 @@
-# requirements.txt
-
-# Add your project dependencies here
-wheel>=0.32.0,<0.42.0
-# Add other dependencies as needed
